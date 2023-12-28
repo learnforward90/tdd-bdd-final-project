@@ -104,3 +104,103 @@ class TestProductModel(unittest.TestCase):
     #
     # ADD YOUR TEST CASES HERE
     #
+    def test_read_a_product(self):
+        """It should Read a Product"""
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        # Fetch it
+        found_product = Product.find(product.id)
+        self.assertEqual(found_product.id, product.id)
+        self.assertEqual(found_product.name, product.name)
+        self.assertEqual(found_product.description, product.description)
+        self.assertEqual(found_product.price, product.price)
+
+    def test_update_a_product(self):
+        """It should Update a Product"""
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        product.description = "new_description"
+        origin_id = product.id
+        product.update()
+        self.assertEqual(product.id, origin_id)
+        self.assertEqual(product.description, "new_description")
+        # Fetch it
+        products = Product.all()
+        self.assertEqual(len(products), 1)
+        self.assertEqual(products[0].id, origin_id)
+        self.assertEqual(products[0].description, "new_description")
+
+    def test_delete_a_product(self):
+        """It should Delete a Product"""
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        self.assertEqual(len(Product.all()), 1)
+        product.delete()
+        self.assertEqual(len(Product.all()), 0)
+
+    def test_list_all_products(self):
+        """It should list all products in DB"""
+        products = Product.all()
+        self.assertEqual(products, [])
+        for _ in range(5):
+            product = ProductFactory()
+            product.create()
+        products = Product.all()
+        self.assertEqual(len(products), 5)
+
+    def test_find_product_by_name(self):
+        """It should Find a product by Name"""
+        products = ProductFactory.create_batch(5)
+        for prod in products:
+            prod.create()
+        name = products[0].name
+        count = len([product for product in products if product.name == name])
+        found = Product.find_by_name(name)
+        self.assertEqual(found.count(), count)
+        for prod in found:
+            self.assertEqual(prod.name, name)
+
+    def test_find_product_by_availability(self):
+        """It should Find a product by Availability"""
+        products = ProductFactory.create_batch(10)
+        for prod in products:
+            prod.create()
+        available = products[0].available
+        count = len([product for product in products if product.available == available])
+        found_available = Product.find_by_availability(available)
+        self.assertEqual(found_available.count(), count)
+        for prod in found_available:
+            self.assertEqual(prod.available, available)
+
+    def test_find_product_by_category(self):
+        """It should Find a product by Category"""
+        products = ProductFactory.create_batch(10)
+        for prod in products:
+            prod.create()
+        category = products[0].category
+        count = len([product for product in products if product.category == category])
+        found_category = Product.find_by_category(category)
+        self.assertEqual(found_category.count(), count)
+        for prod in found_category:
+            self.assertEqual(prod.category, category)
+
+    def test_find_product_by_price(self):
+        """It should Find a product by Price"""
+        products = ProductFactory.create_batch(10)
+        for prod in products:
+            prod.create()
+        price = products[0].price
+        count = len([product for product in products if product.price == price])
+        found = Product.find_by_price(price)
+        self.assertEqual(found.count(), count)
+        for prod in found:
+            self.assertEqual(prod.price, price)
+        price_str = str(price)
+        found_str = Product.find_by_price(price_str)
+        for prod in found_str:
+            self.assertEqual(prod.price, price)
